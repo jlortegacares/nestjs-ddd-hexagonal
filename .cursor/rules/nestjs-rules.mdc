@@ -1,0 +1,459 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# NestJS Domain-Driven Design with Hexagonal Architecture and CQRS
+
+This document establishes rules for a NestJS project implementing Domain-Driven Design with multiple bounded contexts, Hexagonal Architecture, and CQRS pattern, using PostgreSQL as the main database and Redis for projections.
+
+## Project Structure with DDD and Bounded Contexts
+
+Domain-Driven Design with Multiple Bounded Contexts:
+- Each bounded context represents a distinct business domain
+- Contexts are isolated with clear boundaries
+- Each context follows hexagonal architecture internally
+
+### Directory Structure
+
+```
+src/
+├── contexts/                                      # Root directory for all bounded contexts
+│   ├── {context-name}/                            # A specific bounded context
+│   │   ├── domain/                                # Domain layer
+│   │   │   ├── models/                            # Domain models
+│   │   │   ├── value-objects/                     # Value objects
+│   │   │   ├── events/                            # Domain events
+│   │   │   ├── services/                          # Domain services
+│   │   │   ├── repositories/                      # Repository interfaces
+│   │   │   ├── aggregates/                        # Aggregate roots
+│   │   │   ├── factories/                         # Domain factories
+│   │   │   ├── policies/                          # Domain policies
+│   │   │   └── glossary.md                        # Ubiquitous language glossary
+│   │   ├── application/                           # Application layer
+│   │   │   ├── commands/                          # Command definitions
+│   │   │   ├── queries/                           # Query definitions
+│   │   │   ├── event-handlers/                    # Domain event handlers
+│   │   │   ├── ports/                             # Ports (interfaces)
+│   │   │   │   ├── input/                         # Input ports
+│   │   │   │   └── output/                        # Output ports
+│   │   │   └── use-cases/                         # Application use cases
+│   │   └── infrastructure/                        # Infrastructure layer
+│   │       ├── adapters/                          # Adapters
+│   │       │   ├── repositories/                  # Repository implementations
+│   │       │   └── controllers/                   # API controllers
+│   │       ├── persistence/                       # Persistence implementations
+│   │       │   ├── orm/                           # ORM schemas and configurations
+│   │       │   └── redis/                         # Redis projections
+│   │       ├── services/                          # Infrastructure services
+│   │       ├── cqrs/                              # CQRS implementation
+│   │       │   ├── commands/                      # Command handlers
+│   │       │   ├── queries/                       # Query handlers
+│   │       │   ├── events/                        # Event handlers
+│   │       │   └── projections/                   # Redis projections
+│   │       └── integration/                       # Integration with other contexts
+│   │           ├── facades/                       # Facades for other contexts
+│   │           ├── mappers/                       # Data mappers between contexts
+│   │           └── subscribers/                   # Event subscribers
+└── shared/                                        # Shared code between contexts
+    ├── domain/                                    # Shared domain primitives
+    └── infrastructure/                            # Shared infrastructure
+        └── event-bus/                             # Event bus for cross-context communication
+```
+
+### Example Bounded Contexts
+
+- user-management
+- product-catalog
+- order-processing
+- payment
+- inventory
+- shipping
+
+## DDD Specific Guidelines
+
+### Core DDD Patterns
+
+#### Aggregate Roots
+- **Naming:** `*.aggregate.ts`
+- **Description:** Aggregate roots are the entry point to domain models, ensuring consistency boundaries
+- **Examples:** `UserAggregate`, `OrderAggregate`, `ProductAggregate`
+
+#### Entities
+- **Naming:** `*.entity.ts`
+- **Description:** Domain entities with identity that persists over time
+- **Examples:** `User`, `Order`, `Product`
+
+#### Value Objects
+- **Naming:** `*.value-object.ts`
+- **Description:** Immutable objects defined by their attributes
+- **Examples:** `Email`, `Money`, `Address`
+
+#### Domain Events
+- **Naming:** `*.domain-event.ts`
+- **Description:** Events that represent something significant happened in the domain
+- **Examples:** `OrderPlacedDomainEvent`, `PaymentProcessedDomainEvent`, `UserRegisteredDomainEvent`
+
+#### Repositories
+- **Naming:** `*.repository.interface.ts`
+- **Description:** Interfaces for persistence of aggregates
+- **Examples:** `UserRepository`, `OrderRepository`, `ProductRepository`
+
+#### Factories
+- **Naming:** `*.factory.ts`
+- **Description:** Creation logic for complex aggregates or entities
+- **Examples:** `UserFactory`, `OrderFactory`, `ProductFactory`
+
+#### Domain Services
+- **Naming:** `*.domain-service.ts`
+- **Description:** Services that implement domain logic that doesn't belong to entities
+- **Examples:** `PaymentProcessingService`, `InventoryAllocationService`, `PricingService`
+
+### Context Mapping Strategies
+
+#### Shared Kernel
+- **Description:** Common code shared between bounded contexts
+- **Implementation:** `src/shared/domain/`
+
+#### Anti-Corruption Layer
+- **Description:** Translation layer to protect context boundaries
+- **Implementation:** `src/contexts/{context-name}/infrastructure/integration/`
+
+#### Open Host Service
+- **Description:** Well-defined API for other contexts to consume
+- **Implementation:** `src/contexts/{context-name}/infrastructure/adapters/controllers/`
+
+#### Published Language
+- **Description:** Common language for communication between contexts
+- **Implementation:** `src/shared/domain/contracts/`
+
+#### Event-Driven Integration
+- **Description:** Integration through domain events across contexts
+- **Implementation:** `src/contexts/{context-name}/infrastructure/integration/subscribers/`
+
+### Communication Rules
+
+- Contexts should only communicate through well-defined interfaces
+- Use domain events for asynchronous communication between contexts
+- Implement Anti-Corruption Layer when integrating with external systems or other contexts
+- Shared Kernel should be minimal and stable
+- Each context should have its own database schema or collection
+
+### Ubiquitous Language Documentation
+
+- All domain terms must be documented in the glossary (`src/contexts/{context-name}/domain/glossary.md`)
+- Code must use the same terminology as the glossary
+- Domain terms should be consistent within a bounded context
+- Different contexts may have different definitions for the same term
+
+## Code Style
+
+### Naming Conventions
+
+#### PascalCase (Classes)
+- `src/**/*.model.ts`
+- `src/**/*.entity.ts`
+- `src/**/*.aggregate.ts`
+- `src/**/*.value-object.ts`
+- `src/**/*.command.ts`
+- `src/**/*.query.ts`
+- `src/**/*.event.ts`
+- `src/**/*.domain-event.ts`
+- `src/**/*.handler.ts`
+- `src/**/*.controller.ts`
+- `src/**/*.module.ts`
+- `src/**/*.service.ts`
+- `src/**/*.factory.ts`
+
+#### camelCase (Methods, Variables, Functions)
+- `src/**/*.ts`
+
+### File Naming Conventions
+
+#### Domain Layer
+- Aggregates: `*.aggregate.ts`
+- Entities: `*.entity.ts`
+- Value Objects: `*.value-object.ts`
+- Events: `*.domain-event.ts`
+- Repositories: `*.repository.interface.ts`
+- Services: `*.domain-service.ts`
+- Factories: `*.factory.ts`
+- Policies: `*.policy.ts`
+
+#### Application Layer
+- Use Cases: `*.use-case.ts`
+- Command Handlers: `*.command-handler.ts`
+- Query Handlers: `*.query-handler.ts`
+- Event Handlers: `*.event-handler.ts`
+- Input Ports: `*.port.ts`
+- Output Ports: `*.port.ts`
+
+#### Infrastructure Layer
+- Controllers: `*.controller.ts`
+- Repositories: `*.repository.ts`
+- ORM Entities: `*.schema.ts`
+- Redis Projections: `*.projection.ts`
+- Facades: `*.facade.ts`
+- Mappers: `*.mapper.ts`
+- Subscribers: `*.subscriber.ts`
+
+#### CQRS
+- Commands: `*.command.ts`
+- Queries: `*.query.ts`
+- Events: `*.event.ts`
+- Projections: `*.projection.ts`
+
+## Testing Guidelines
+
+### Coverage Thresholds
+
+#### Global
+- Statements: 80%
+- Branches: 70%
+- Functions: 80%
+- Lines: 80%
+
+#### Domain Layer
+- Statements: 95%
+- Branches: 90%
+- Functions: 95%
+- Lines: 95%
+
+#### Application Layer
+- Statements: 90%
+- Branches: 85%
+- Functions: 90%
+- Lines: 90%
+
+### Frameworks
+- Unit Tests: Jest
+- Integration Tests: Jest + Supertest
+- E2E Tests: Jest + Supertest
+
+### Testing Patterns
+
+#### Domain Layer Testing
+- **Description:** Domain models should be tested in isolation without dependencies
+- **Files:** `test/contexts/{context-name}/unit/domain/**/*.spec.ts`
+- **Examples:**
+  - Aggregate invariants and business rules
+  - Value object validation and behavior
+  - Domain service logic
+  - Factory creation logic
+
+#### Application Layer Testing
+- **Description:** Application services should be tested with mocked repositories and other dependencies
+- **Files:** `test/contexts/{context-name}/unit/application/**/*.spec.ts`
+- **Examples:**
+  - Command handlers execution flow
+  - Query handlers data retrieval
+  - Event handlers processing logic
+
+#### Infrastructure Layer Testing
+- **Description:** Test infrastructure components like repositories and controllers
+- **Files:** `test/contexts/{context-name}/unit/infrastructure/**/*.spec.ts`
+- **Examples:**
+  - Repository implementations
+  - Controller request handling
+  - Mapping logic between contexts
+
+#### Integration Testing
+- **Description:** Test interaction between multiple components
+- **Files:** `test/contexts/{context-name}/integration/**/*.spec.ts`
+- **Examples:**
+  - Repository with actual database
+  - Multiple use cases working together
+  - Context boundary interactions
+
+#### E2E Testing
+- **Description:** Test API endpoints and complete user workflows
+- **Files:** `test/contexts/{context-name}/e2e/**/*.spec.ts`
+- **Examples:**
+  - HTTP API endpoints
+  - End-to-end business workflows
+  - Cross-context scenarios
+
+## Database Management
+
+### Context-Specific Database Schemas
+
+- Each bounded context should have its own database schema
+- **PostgreSQL:** Schema per bounded context with naming pattern `{context_name}`
+- **Redis:** Key prefix per bounded context with pattern `{context_name}:`
+
+### PostgreSQL Configuration
+
+- **Entities:** `src/contexts/{context-name}/infrastructure/persistence/orm/schemas/`
+- **Migrations:** `src/contexts/{context-name}/infrastructure/persistence/orm/migrations/`
+- **Config:** `src/contexts/{context-name}/infrastructure/config/typeorm.config.ts`
+- **ORM Settings:**
+  - Type: PostgreSQL
+  - Use Migrations: True
+  - Synchronize: False (always false in production)
+
+### Redis Configuration
+
+- **Projections:** `src/contexts/{context-name}/infrastructure/persistence/redis/projections/`
+- **Config:** `src/contexts/{context-name}/infrastructure/config/redis.config.ts`
+- **Cache Settings:**
+  - TTL: 86400 (24 hours default)
+  - Key Prefix: `{context_name}:proj:`
+
+## CQRS Pattern Implementation
+
+### Commands
+
+- **Naming:** `*.command.ts`
+- **Directory:** `src/contexts/{context-name}/infrastructure/cqrs/commands/`
+- **Handlers:** `src/contexts/{context-name}/infrastructure/cqrs/commands/handlers/`
+- **Pattern:** Commands should be named in imperative tense and represent user intent
+- **Examples:** `CreateUserCommand`, `PlaceOrderCommand`, `ProcessPaymentCommand`
+
+### Queries
+
+- **Naming:** `*.query.ts`
+- **Directory:** `src/contexts/{context-name}/infrastructure/cqrs/queries/`
+- **Handlers:** `src/contexts/{context-name}/infrastructure/cqrs/queries/handlers/`
+- **Pattern:** Queries should be named to represent information requests
+- **Examples:** `GetUserByIdQuery`, `FindOrdersByUserIdQuery`, `ListProductsQuery`
+
+### Events
+
+- **Naming:** `*.event.ts`
+- **Directory:** `src/contexts/{context-name}/infrastructure/cqrs/events/`
+- **Handlers:** `src/contexts/{context-name}/infrastructure/cqrs/events/handlers/`
+- **Pattern:** Events should be named in past tense to represent something that happened
+- **Examples:** `UserRegisteredEvent`, `OrderPlacedEvent`, `PaymentCompletedEvent`
+
+### Projections
+
+- **Naming:** `*.projection.ts`
+- **Directory:** `src/contexts/{context-name}/infrastructure/cqrs/projections/`
+- **Pattern:** Projections should transform domain events into optimized read models in Redis
+- **Examples:** `UserProfileProjection`, `OrderSummaryProjection`, `ProductCatalogProjection`
+
+### Event Bus
+
+- **Description:** Event bus for publishing and subscribing to events across bounded contexts
+- **Implementation:** `src/shared/infrastructure/event-bus/`
+- **Subscribers:** `src/contexts/{context-name}/infrastructure/integration/subscribers/`
+
+## Dependency Injection
+
+### Provider Registrations
+
+- **Repositories:** `src/contexts/{context-name}/infrastructure/adapters/repositories/*.repository.ts`
+- **Services:**
+  - `src/contexts/{context-name}/application/use-cases/*.use-case.ts`
+  - `src/contexts/{context-name}/domain/services/*.domain-service.ts`
+- **Factories:** `src/contexts/{context-name}/domain/factories/*.factory.ts`
+- **Handlers:**
+  - `src/contexts/{context-name}/infrastructure/cqrs/commands/handlers/*.handler.ts`
+  - `src/contexts/{context-name}/infrastructure/cqrs/queries/handlers/*.handler.ts`
+  - `src/contexts/{context-name}/infrastructure/cqrs/events/handlers/*.handler.ts`
+- **Integration:** `src/contexts/{context-name}/infrastructure/integration/**/*.ts`
+
+### Module Structure
+
+- **Context Root:** `src/contexts/{context-name}/{context-name}.module.ts`
+- **Domain:** `src/contexts/{context-name}/domain/domain.module.ts`
+- **Infrastructure:** `src/contexts/{context-name}/infrastructure/infrastructure.module.ts`
+- **Application:** `src/contexts/{context-name}/application/application.module.ts`
+- **CQRS:** `src/contexts/{context-name}/infrastructure/cqrs/cqrs.module.ts`
+- **Shared:** `src/shared/shared.module.ts`
+
+## Code Quality
+
+### Linting and Formatting
+
+#### ESLint Configuration
+- eslint:recommended
+- plugin:@typescript-eslint/recommended
+- prettier
+
+#### Prettier Configuration
+- Single Quote: True
+- Trailing Comma: All
+- Print Width: 100
+- Tab Width: 2
+
+### Documentation Requirements
+
+#### JSDoc Requirements
+- `src/contexts/{context-name}/domain/**/*.ts`
+- `src/contexts/{context-name}/application/ports/**/*.ts`
+- `src/contexts/{context-name}/infrastructure/adapters/controllers/**/*.ts`
+
+#### README Files
+- `src/contexts/{context-name}/README.md`
+- `src/contexts/{context-name}/domain/README.md`
+- `src/contexts/{context-name}/application/README.md`
+- `src/contexts/{context-name}/infrastructure/README.md`
+- `src/shared/README.md`
+
+#### Ubiquitous Language Glossary
+- `src/contexts/{context-name}/domain/glossary.md`
+
+### Architectural Boundary Rules
+
+#### Domain Layer Rules
+- **Description:** Domain layer should not depend on application or infrastructure layers
+- **Forbidden:**
+  - `src/contexts/{context-name}/domain/**/*.ts -> src/contexts/{context-name}/application/**/*.ts`
+  - `src/contexts/{context-name}/domain/**/*.ts -> src/contexts/{context-name}/infrastructure/**/*.ts`
+
+#### Application Layer Rules
+- **Description:** Application layer should not depend on infrastructure layer
+- **Forbidden:**
+  - `src/contexts/{context-name}/application/**/*.ts -> src/contexts/{context-name}/infrastructure/**/*.ts`
+
+#### Bounded Context Rules
+- **Description:** Bounded contexts should only communicate through well-defined interfaces
+- **Allowed:**
+  - `src/contexts/{context-name}/**/*.ts -> src/contexts/{other-context}/infrastructure/adapters/controllers/**/*.ts`
+  - `src/contexts/{context-name}/**/*.ts -> src/contexts/{other-context}/infrastructure/integration/facades/**/*.ts`
+  - `src/contexts/{context-name}/**/*.ts -> src/shared/**/*.ts`
+- **Forbidden:**
+  - `src/contexts/{context-name}/**/*.ts -> src/contexts/{other-context}/domain/**/*.ts`
+  - `src/contexts/{context-name}/**/*.ts -> src/contexts/{other-context}/application/**/*.ts`
+
+## CI/CD Configuration
+
+### Pipeline Steps
+1. Lint
+2. Build
+3. Unit Tests
+4. Integration Tests
+5. E2E Tests
+6. Docker Build
+
+### Environment Configurations
+
+#### Development
+- **PostgreSQL:**
+  - Host: localhost
+  - Port: 5432
+- **Redis:**
+  - Host: localhost
+  - Port: 6379
+
+#### Testing
+- **PostgreSQL:**
+  - Host: test-postgres
+  - Port: 5432
+- **Redis:**
+  - Host: test-redis
+  - Port: 6379
+
+#### Production
+- Use environment variables
+
+### Docker Configuration
+
+- **Files:**
+  - Dockerfile
+  - docker-compose.yml
+  - .dockerignore
+- **Containerization:**
+  - Each bounded context can be deployed as a separate container
+  - Container naming pattern: `{context-name}-service`
