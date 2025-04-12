@@ -2,6 +2,7 @@ import * as bcrypt from 'bcrypt';
 
 export class Password {
   private static readonly SALT_ROUNDS = 10;
+
   private readonly hashedPassword: string;
 
   private constructor(hashedPassword: string) {
@@ -11,6 +12,7 @@ export class Password {
   public static async createFromPlainPassword(plainPassword: string): Promise<Password> {
     Password.ensureValidPassword(plainPassword);
     const hashedPassword = await bcrypt.hash(plainPassword, Password.SALT_ROUNDS);
+
     return new Password(hashedPassword);
   }
 
@@ -40,4 +42,4 @@ export class Password {
   get value(): string {
     return this.hashedPassword;
   }
-} 
+}

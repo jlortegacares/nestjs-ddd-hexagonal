@@ -1,4 +1,4 @@
-export interface PostgresSlaveConfig {
+export interface IPostgresSlaveConfig {
   host: string;
   port: number;
   username: string;
@@ -6,18 +6,17 @@ export interface PostgresSlaveConfig {
   database: string;
 }
 
-export interface PostgresConfig {
-  host: string;
-  port: number;
-  username: string;
-  password: string;
-  database: string;
-  logging: boolean;
-  ssl: boolean;
-  poolSize: number;
-  slaves: PostgresSlaveConfig[];
+export interface IPostgresConfig {
+  master: {
+    host: string;
+    port: number;
+    username: string;
+    password: string;
+    database: string;
+  };
+  slaves?: IPostgresSlaveConfig[];
 }
 
-export interface DatabaseConfig {
-  postgres: PostgresConfig;
-} 
+export interface IDatabaseConfig {
+  postgres: IPostgresConfig;
+}

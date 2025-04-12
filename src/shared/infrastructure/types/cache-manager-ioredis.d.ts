@@ -1,10 +1,24 @@
-declare module 'cache-manager-ioredis' {
-  import { Store, Config } from 'cache-manager';
-  import { RedisOptions } from 'ioredis';
+import { CacheStore } from '@nestjs/cache-manager';
+import { Redis, RedisOptions } from 'ioredis';
 
-  export interface RedisStoreOptions extends RedisOptions {
-    ttl?: number;
-  }
+// Interface name with 'I' prefix as per naming convention
+export interface IRedisStoreOptions extends RedisOptions {
+  url?: string;
+  host?: string;
+  port?: number;
+  password?: string;
+  db?: number;
+  keyPrefix?: string;
+  ttl?: number;
+}
 
-  export function redisStore(options?: RedisStoreOptions): Promise<Store>;
-} 
+export interface IRedisStore extends CacheStore {
+  client: Redis;
+  getClient(): Redis;
+  set<T>(key: string, value: T, ttl?: number): Promise<void>;
+  get<T>(key: string): Promise<T | null>;
+  del(key: string): Promise<void>;
+  reset(): Promise<void>;
+}
+
+export declare function redisStore(options: IRedisStoreOptions): () => IRedisStore;

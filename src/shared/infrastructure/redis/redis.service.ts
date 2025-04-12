@@ -1,20 +1,25 @@
-import { Injectable, Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 
+export interface ICacheEntry<T> {
+  key: string;
+  value: T;
+  ttl?: number;
+}
+
 @Injectable()
-export class RedisCacheService {
-  constructor(
-    @Inject(CACHE_MANAGER) private readonly cache: Cache,
-  ) {}
+export class RedisService {
+  constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {}
+
+  async set<T>(key: string, value: T, ttl?: number): Promise<void> {
+    await this.cache.set(key, value, ttl);
+  }
 
   async get<T>(key: string): Promise<T | undefined> {
     const value = await this.cache.get<T>(key);
-    return value === null ? undefined : value;
-  }
 
-  async set(key: string, value: any, ttl?: number): Promise<void> {
-    await this.cache.set(key, value, ttl);
+    return value === null ? undefined : value;
   }
 
   async del(key: string): Promise<void> {
@@ -22,45 +27,24 @@ export class RedisCacheService {
   }
 
   async clear(): Promise<void> {
-    // Note: This is implementation specific and might not be available in all cache stores
-    if (typeof (this.cache as any).clear === 'function') {
-      await (this.cache as any).clear();
-    } else {
-      throw new Error('Clear operation not supported by the cache store');
-    }
+    await this.cache.del('*');
   }
 
-  /**
-   * Get multiple keys at once
-   */
-  async mget<T>(keys: string[]): Promise<(T | undefined)[]> {
-    return await Promise.all(keys.map(key => this.get<T>(key)));
+  async setMultiple<T>(entries: ICacheEntry<T>[]): Promise<void> {
+    await Promise.all(entries.map(entry => this.set(entry.key, entry.value, entry.ttl)));
   }
 
-  /**
-   * Set multiple key-value pairs at once
-   */
-  async mset(entries: { key: string; value: any; ttl?: number }[]): Promise<void> {
-    await Promise.all(
-      entries.map(entry => this.set(entry.key, entry.value, entry.ttl))
-    );
-  }
-
-  /**
-   * Get or set a value if it doesn't exist
-   */
-  async getOrSet<T>(
-    key: string,
-    getValue: () => Promise<T>,
-    ttl?: number
-  ): Promise<T> {
+  async getOrSet<T>(key: string, getValue: () => Promise<T>, ttl?: number): Promise<T> {
     const value = await this.get<T>(key);
+
     if (value !== undefined) {
       return value;
     }
 
     const newValue = await getValue();
+
     await this.set(key, newValue, ttl);
+
     return newValue;
   }
-} 
+}

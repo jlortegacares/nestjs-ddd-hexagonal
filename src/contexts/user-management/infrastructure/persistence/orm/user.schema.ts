@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('users')
 export class UserSchema {
@@ -25,4 +25,4 @@ export class UserSchema {
 
   @Column()
   updatedAt: Date;
-} 
+}

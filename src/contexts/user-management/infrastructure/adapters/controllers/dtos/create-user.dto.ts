@@ -5,7 +5,7 @@ export class CreateUserDto {
   @IsEmail({}, { message: 'El email debe ser válido' })
   @ApiProperty({
     description: 'Email del usuario',
-    example: 'usuario@ejemplo.com'
+    example: 'usuario@ejemplo.com',
   })
   email: string;
 
@@ -14,21 +14,21 @@ export class CreateUserDto {
   @ApiProperty({
     description: 'Contraseña del usuario',
     example: 'password123',
-    minLength: 8
+    minLength: 8,
   })
   password: string;
 
   @IsString()
   @ApiProperty({
     description: 'Nombre del usuario',
-    example: 'Juan'
+    example: 'Juan',
   })
   firstName: string;
 
   @IsString()
   @ApiProperty({
     description: 'Apellido del usuario',
-    example: 'Pérez'
+    example: 'Pérez',
   })
   lastName: string;
-} 
+}

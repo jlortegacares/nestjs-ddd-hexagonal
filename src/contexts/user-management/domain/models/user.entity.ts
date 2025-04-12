@@ -1,7 +1,8 @@
 import { AggregateRoot } from '@nestjs/cqrs';
+
+import { UserCreatedDomainEvent } from '../events/user-created.domain-event';
 import { Email } from '../value-objects/email.value-object';
 import { Password } from '../value-objects/password.value-object';
-import { UserCreatedDomainEvent } from '../events/user-created.domain-event';
 
 export class User extends AggregateRoot {
   constructor(
@@ -26,7 +27,9 @@ export class User extends AggregateRoot {
     lastName: string,
   ): User {
     const user = new User(id, email, password, firstName, lastName);
+
     user.apply(new UserCreatedDomainEvent(id, email.value));
+
     return user;
   }
 
@@ -71,4 +74,4 @@ export class User extends AggregateRoot {
     this.lastName = lastName;
     this.updatedAt = new Date();
   }
-} 
+}

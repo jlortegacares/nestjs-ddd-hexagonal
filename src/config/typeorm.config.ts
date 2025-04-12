@@ -1,5 +1,5 @@
-import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
+import { DataSource } from 'typeorm';
 
 config();
 
@@ -13,4 +13,4 @@ export default new DataSource({
   entities: ['src/**/*.entity.ts', 'src/**/*.schema.ts'],
   migrations: ['src/migrations/*.ts'],
   synchronize: false,
-}); 
+});

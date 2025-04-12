@@ -25,4 +25,4 @@ export const getRedisConfig = async (): Promise<CacheModuleOptions> => {
     // Global options
     isGlobal: true,
   };
-}; 
+};

@@ -3,9 +3,8 @@ import { Email } from '../value-objects/email.value-object';
 
 export const USER_REPOSITORY = 'USER_REPOSITORY';
 
-export interface UserRepository {
+export interface IUserRepository {
   save(user: User): Promise<void>;
-  findById(id: string): Promise<User | null>;
-  findByEmail(email: Email): Promise<User | null>;
   exists(email: Email): Promise<boolean>;
-} 
+  findByEmail(email: Email): Promise<User | null>;
+}
