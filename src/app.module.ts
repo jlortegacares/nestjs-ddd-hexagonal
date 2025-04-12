@@ -1,28 +1,20 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { UserManagementModule } from './contexts/user-management/infrastructure/user-management.module';
+import { PostgresModule } from './shared/infrastructure/postgres/postgres.module';
 
 @Module({
   imports: [
+    // Configuración global
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: configService.get('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_NAME'),
-        entities: [__dirname + '/**/*.schema{.ts,.js}'],
-        synchronize: configService.get('NODE_ENV') !== 'production',
-      }),
-      inject: [ConfigService],
-    }),
+    
+    // Base de datos
+    PostgresModule,
+    
+    // Módulos de la aplicación
     CqrsModule,
     UserManagementModule,
   ],
