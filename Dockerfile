@@ -3,29 +3,35 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Copy package files
-COPY package*.json ./
+COPY package.json pnpm-lock.yaml ./
 COPY tsconfig*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
 # Build application
-RUN npm run build
+RUN pnpm run build
 
 # Development stage
 FROM node:20-alpine AS development
 
 WORKDIR /app
 
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Copy package files and install dependencies including devDependencies
-COPY package*.json ./
+COPY package.json pnpm-lock.yaml ./
 COPY tsconfig*.json ./
 
-RUN npm install
+RUN pnpm install
 
 # Copy source code
 COPY . .
@@ -34,18 +40,21 @@ COPY . .
 EXPOSE 3000
 
 # Start development server
-CMD ["npm", "run", "start:dev"]
+CMD ["pnpm", "run", "start:dev"]
 
 # Production stage
 FROM node:20-alpine AS production
 
 WORKDIR /app
 
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Copy package files
-COPY package*.json ./
+COPY package.json pnpm-lock.yaml ./
 
 # Install only production dependencies
-RUN npm ci --only=production
+RUN pnpm install --prod --frozen-lockfile
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
@@ -58,4 +67,4 @@ ENV PORT=3000
 EXPOSE 3000
 
 # Start production server
-CMD ["npm", "run", "start:prod"] 
+CMD ["pnpm", "run", "start:prod"] 
