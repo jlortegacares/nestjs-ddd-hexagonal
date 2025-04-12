@@ -1,105 +1,102 @@
 # Shared Kernel
 
-## Descripción
-
-El Shared Kernel contiene código compartido entre todos los bounded contexts. Este código debe ser estable y cambiar con poca frecuencia, ya que los cambios aquí afectan a todos los contextos.
+Este módulo contiene código compartido entre todos los contextos bounded del sistema.
 
 ## Estructura
 
 ```
 shared/
-├── domain/           # Primitivas de dominio compartidas
-│   ├── value-objects/
-│   ├── events/
-│   └── interfaces/
-└── infrastructure/   # Componentes de infraestructura compartidos
-    ├── persistence/
-    ├── event-bus/
-    └── logging/
+├── domain/             # Primitivas de dominio compartidas
+│   ├── value-objects/  # Value objects base
+│   ├── events/        # Eventos de dominio base
+│   └── errors/        # Errores de dominio
+└── infrastructure/    # Infraestructura compartida
+    ├── config/       # Configuraciones (Redis, DB)
+    ├── redis/        # Servicio de caché Redis
+    └── types/        # Tipos y declaraciones TypeScript
 ```
 
 ## Componentes Principales
 
 ### Domain
 
-#### Value Objects
-- `UUID`: Identificador único universal
-- `Timestamp`: Manejo de fechas y tiempos
-- `Money`: Representación de valores monetarios
+#### Value Objects Base
+- `Uuid`: Identificador único universal
+- `Email`: Validación de email
+- `Password`: Manejo de contraseñas
 
-#### Interfaces
-- `IAggregateRoot`: Interface base para agregados
-- `IDomainEvent`: Interface base para eventos de dominio
-- `IRepository`: Interface base para repositorios
+#### Eventos Base
+- `DomainEvent`: Clase base para eventos de dominio
+- `EventBus`: Interface para el bus de eventos
+
+#### Errores
+- `DomainError`: Error base de dominio
+- `ValidationError`: Error de validación
+- `NotFoundError`: Error de recurso no encontrado
 
 ### Infrastructure
 
-#### Event Bus
-- `EventBus`: Implementación del bus de eventos para comunicación entre contextos
-- `EventSubscriber`: Base para suscriptores de eventos
-- `EventPublisher`: Publicador de eventos
+#### Configuración Redis
+- Configuración del cliente Redis
+- Opciones de caché
+- Variables de entorno
 
-#### Persistence
-- `BaseRepository`: Implementación base para repositorios
-- `Transaction`: Manejo de transacciones
-- `DatabaseConnection`: Configuración de conexión
+#### Servicio Redis
+- Operaciones CRUD de caché
+- Manejo de TTL
+- Operaciones batch
 
-#### Logging
-- `Logger`: Servicio de logging
-- `LoggerDecorator`: Decorador para logging automático
+## Uso
 
-## Guías de Uso
+### Redis Cache
 
-### Cuándo Usar el Shared Kernel
-
-1. Para código que es verdaderamente común entre contextos
-2. Para interfaces y contratos compartidos
-3. Para utilidades de infraestructura comunes
-
-### Cuándo NO Usar el Shared Kernel
-
-1. Para lógica específica de un contexto
-2. Para código que cambia frecuentemente
-3. Para implementaciones que podrían variar entre contextos
-
-## Reglas de Desarrollo
-
-1. Los cambios deben ser aprobados por el equipo de arquitectura
-2. Mantener al mínimo las dependencias
-3. Documentar todos los componentes públicos
-4. Incluir tests exhaustivos
-
-## Ejemplos de Uso
-
-### Event Bus
 ```typescript
-// Publicar un evento
-await eventBus.publish(new UserCreatedEvent({ id, email }));
+import { RedisCacheService } from '@shared/infrastructure/redis/redis.service';
 
-// Suscribirse a un evento
-@EventSubscriber(UserCreatedEvent)
-export class WelcomeEmailHandler implements IEventHandler {
-  handle(event: UserCreatedEvent): Promise<void> {
-    // Lógica del handler
+@Injectable()
+export class MiServicio {
+  constructor(private readonly cache: RedisCacheService) {}
+
+  async getData(key: string): Promise<Data> {
+    return this.cache.getOrSet(
+      key,
+      async () => this.fetchData(),
+      3600 // TTL en segundos
+    );
   }
 }
 ```
 
 ### Value Objects
-```typescript
-// Crear un UUID
-const id = UUID.create();
 
-// Usar Money
-const price = Money.fromDecimal(99.99, 'USD');
+```typescript
+import { Email, Password } from '@shared/domain/value-objects';
+
+const email = new Email('user@example.com');
+const password = await Password.create('myPassword123');
+```
+
+### Eventos de Dominio
+
+```typescript
+import { DomainEvent } from '@shared/domain/events';
+
+export class MiEvento extends DomainEvent {
+  constructor(
+    public readonly aggregateId: string,
+    public readonly data: any
+  ) {
+    super(aggregateId);
+  }
+}
 ```
 
 ## Testing
 
 ```bash
-# Unit tests
-npm run test src/shared
+# Tests unitarios del módulo shared
+pnpm test src/shared
 
-# Integration tests
-npm run test:integration src/shared
+# Tests de integración
+pnpm test:e2e src/shared
 ``` 

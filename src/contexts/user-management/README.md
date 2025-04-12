@@ -1,103 +1,63 @@
 # User Management Context
 
-## Descripción
+Este contexto bounded se encarga de la gestión de usuarios en el sistema.
 
-Este bounded context se encarga de la gestión de usuarios en el sistema, incluyendo registro, autenticación y gestión de perfiles.
+## Dominio
 
-## Estructura
+### Entidades
+- `User`: Representa un usuario en el sistema
+  - Propiedades: email, password (hash), firstName, lastName
+  - Comportamientos: cambiar contraseña, actualizar perfil
 
-```
-user-management/
-├── domain/           # Capa de dominio
-│   ├── models/      # Entidades y agregados
-│   ├── events/      # Eventos de dominio
-│   └── repositories # Interfaces de repositorios
-├── application/     # Capa de aplicación
-│   ├── use-cases/   # Casos de uso (commands/queries)
-│   └── ports/       # Puertos (interfaces)
-└── infrastructure/  # Capa de infraestructura
-    ├── adapters/    # Adaptadores
-    └── persistence/ # Implementación de persistencia
-```
-
-## Componentes Principales
-
-### Domain Layer
-
-#### Entidades
-- `User`: Agregado raíz que representa un usuario en el sistema
-
-#### Value Objects
+### Value Objects
 - `Email`: Representa un email válido
 - `Password`: Representa una contraseña hasheada
 
-#### Eventos de Dominio
+### Eventos de Dominio
 - `UserCreatedDomainEvent`: Emitido cuando se crea un nuevo usuario
-- `UserUpdatedDomainEvent`: Emitido cuando se actualiza un usuario
+- `UserPasswordChangedDomainEvent`: Emitido cuando un usuario cambia su contraseña
 
-### Application Layer
+## Casos de Uso
 
-#### Casos de Uso
-- `CreateUserUseCase`: Registro de nuevos usuarios
-- `AuthenticateUserUseCase`: Autenticación de usuarios
-- `UpdateUserProfileUseCase`: Actualización de perfiles
+### Comandos
+- `CreateUserUseCase`: Registrar un nuevo usuario
+- `ChangePasswordUseCase`: Cambiar contraseña de usuario
+- `UpdateUserProfileUseCase`: Actualizar perfil de usuario
 
-### Infrastructure Layer
+### Queries
+- `GetUserByIdQuery`: Obtener usuario por ID
+- `GetUserByEmailQuery`: Obtener usuario por email
 
-#### Adaptadores
-- `UserController`: API REST para operaciones de usuarios
-- `UserRepository`: Implementación TypeORM del repositorio
+## Infraestructura
 
-#### Persistencia
-- `UserSchema`: Schema TypeORM para la entidad User
+### Controllers
+- `UserController`: Endpoints REST para gestión de usuarios
+  - POST /users: Crear usuario
+  - PUT /users/:id/password: Cambiar contraseña
+  - PUT /users/:id/profile: Actualizar perfil
 
-## Reglas de Negocio
+### Repositorios
+- `PostgresUserRepository`: Implementación PostgreSQL del repositorio de usuarios
 
-1. El email debe ser único en el sistema
-2. Las contraseñas deben tener al menos 8 caracteres
-3. Los usuarios no pueden ser eliminados (soft delete)
+### Cache
+- Caché de perfiles de usuario en Redis
+- TTL: 24 horas
 
-## Eventos Publicados
+## Integración con otros Contextos
 
-Este contexto publica los siguientes eventos de dominio:
+### Eventos Publicados
+- `UserCreatedDomainEvent`: Notifica a otros contextos sobre nuevos usuarios
+- `UserPasswordChangedDomainEvent`: Notifica cambios de contraseña
 
-- `UserCreatedDomainEvent`
-  - Cuando: Al crear un nuevo usuario
-  - Datos: ID, email, timestamp
+### Eventos Consumidos
+- Ninguno actualmente
 
-- `UserUpdatedDomainEvent`
-  - Cuando: Al actualizar información del usuario
-  - Datos: ID, campos actualizados, timestamp
-
-## Endpoints API
-
-### POST /users
-- Crear un nuevo usuario
-- Body: email, password, firstName, lastName
-- Respuesta: 201 Created
-
-### POST /users/login
-- Autenticar usuario
-- Body: email, password
-- Respuesta: JWT token
-
-### GET /users/me
-- Obtener perfil del usuario actual
-- Header: Authorization Bearer token
-- Respuesta: Datos del usuario
-
-### PUT /users/me
-- Actualizar perfil del usuario
-- Header: Authorization Bearer token
-- Body: firstName, lastName
-- Respuesta: Datos actualizados
-
-## Tests
+## Testing
 
 ```bash
-# Unit tests
-npm run test src/contexts/user-management
+# Tests unitarios del contexto
+pnpm test src/contexts/user-management
 
-# e2e tests
-npm run test:e2e src/contexts/user-management
+# Tests e2e del contexto
+pnpm test:e2e src/contexts/user-management
 ``` 

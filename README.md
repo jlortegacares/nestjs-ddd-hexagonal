@@ -41,13 +41,14 @@ src/
 - **ORM:** TypeORM
 - **Validación:** class-validator
 - **Linting:** ESLint + Prettier
+- **Package Manager:** pnpm
 
 ## Requisitos
 
 - Node.js (v18 o superior)
 - PostgreSQL
 - Redis
-- npm o yarn
+- pnpm (recomendado) o npm
 
 ## Configuración
 
@@ -57,49 +58,54 @@ git clone https://github.com/jlortegacares/nestjs-ddd-hexagonal.git
 cd nestjs-ddd-hexagonal
 ```
 
-2. Instalar dependencias:
+2. Instalar pnpm (si no está instalado):
 ```bash
-npm install
+npm install -g pnpm
 ```
 
-3. Configurar variables de entorno:
+3. Instalar dependencias:
+```bash
+pnpm install
+```
+
+4. Configurar variables de entorno:
 ```bash
 cp .env.example .env
 ```
 
-4. Configurar la base de datos:
+5. Configurar la base de datos:
 ```bash
 # Crear la base de datos en PostgreSQL
 createdb nestjs_ddd
 ```
 
-5. Ejecutar migraciones:
+6. Ejecutar migraciones:
 ```bash
-npm run typeorm:run-migrations
+pnpm typeorm:run-migrations
 ```
 
 ## Desarrollo
 
 ```bash
 # Desarrollo
-npm run start:dev
+pnpm start:dev
 
 # Producción
-npm run build
-npm run start:prod
+pnpm build
+pnpm start:prod
 ```
 
 ## Testing
 
 ```bash
 # Unit tests
-npm run test
+pnpm test
 
 # e2e tests
-npm run test:e2e
+pnpm test:e2e
 
 # Test coverage
-npm run test:cov
+pnpm test:cov
 ```
 
 ## Documentación API
@@ -117,10 +123,10 @@ El proyecto utiliza ESLint y Prettier con reglas estrictas:
 
 ```bash
 # Verificar código
-npm run lint
+pnpm lint
 
 # Corregir problemas automáticamente
-npm run lint:fix
+pnpm lint:fix
 ```
 
 ### Reglas Principales

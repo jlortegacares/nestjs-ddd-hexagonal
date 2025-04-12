@@ -1,0 +1,138 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+# Conventional Commits Guide
+
+This document outlines the Conventional Commits specification for creating a standardized commit message format in our project.
+
+## Overview
+
+Conventional Commits is a specification for adding human and machine-readable meaning to commit messages. It provides an easy set of rules for creating an explicit commit history, which makes it easier to write automated tools on top of the commit history.
+
+## Commit Message Structure
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+## Types
+
+The commit type must be one of the following:
+
+| Type | Description |
+|------|-------------|
+| `feat` | A new feature |
+| `fix` | A bug fix |
+| `docs` | Documentation only changes |
+| `style` | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
+| `refactor` | A code change that neither fixes a bug nor adds a feature |
+| `perf` | A code change that improves performance |
+| `test` | Adding missing tests or correcting existing tests |
+| `build` | Changes that affect the build system or external dependencies |
+| `ci` | Changes to our CI configuration files and scripts |
+| `chore` | Other changes that don't modify src or test files |
+| `revert` | Reverts a previous commit |
+
+## Scopes
+
+The scope is optional and represents the section of the codebase that is affected by the change. For our NestJS DDD project with multiple bounded contexts, the scope could be:
+
+- Any bounded context name (e.g., `user-management`, `product-catalog`, `order-processing`)
+- Layer name within a bounded context (e.g., `domain`, `application`, `infrastructure`)
+- Cross-cutting concern (e.g., `auth`, `logging`, `config`)
+- Any filename without extension (e.g., `user-repository`, `order-aggregate`)
+
+## Description
+
+The description is a short summary of the code changes. It should follow these rules:
+
+- Use the imperative, present tense: "change" not "changed" nor "changes"
+- Don't capitalize the first letter
+- No period (.) at the end
+
+## Body
+
+The body is optional and should include the motivation for the change and contrast this with previous behavior. It should follow these rules:
+
+- Use the imperative, present tense
+- Include motivation for the change and contrast with previous behavior
+- Can include multiple paragraphs
+
+## Footer
+
+The footer is optional and is used to reference issue tracker IDs or provide additional metadata.
+
+### Breaking Changes
+
+Breaking changes should be indicated by adding `BREAKING CHANGE:` at the beginning of the footer or by appending a `!` after the type/scope.
+
+Example:
+```
+feat(api)!: remove deprecated user endpoints
+
+BREAKING CHANGE: The /api/v1/users endpoint has been removed. Use /api/v2/users instead.
+```
+
+### Referencing Issues
+
+Issue references should be included in the footer using the format:
+
+```
+Closes #123, #456
+Fixes #789
+Related to #101
+```
+
+## Examples
+
+### Simple Feature
+```
+feat(user-management): add user registration endpoint
+```
+
+### Bug Fix with Scope
+```
+fix(product-catalog): correct price calculation for bulk purchases
+```
+
+### Documentation Change
+```
+docs: update README with project setup instructions
+```
+
+### Refactoring Code
+```
+refactor(order-processing): simplify order validation logic
+```
+
+### Breaking Change
+```
+feat(api)!: change authentication mechanism
+
+BREAKING CHANGE: JWT is now required for all API endpoints
+```
+
+### Multiple Issues
+```
+fix(payment): handle failed transaction recovery
+
+Closes #123, #124
+```
+
+### Commit with Body
+```
+feat(inventory): implement real-time stock updates
+
+This implementation uses WebSockets to push immediate updates to clients
+when inventory levels change, replacing the previous polling approach.
+
+
