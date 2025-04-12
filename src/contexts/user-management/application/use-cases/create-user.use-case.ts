@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { User } from '../../domain/models/user.entity';
 import { Email } from '../../domain/value-objects/email.value-object';
 import { Password } from '../../domain/value-objects/password.value-object';
@@ -34,7 +34,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     const password = await Password.createFromPlainPassword(command.password);
     
     const user = User.create(
-      uuidv4(),
+      uuid(),
       email,
       password,
       command.firstName,
