@@ -21,7 +21,11 @@
       "@/*": ["src/*"],
       "@shared/*": ["src/shared/*"],
       "@contexts/*": ["src/contexts/*"]
-    }
+    },
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/shared/infrastructure/types"
+    ]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
