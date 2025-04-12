@@ -22,7 +22,12 @@ module.exports = {
     node: true,
     jest: true,
   },
-  ignorePatterns: ['.eslintrc.js'],
+  ignorePatterns: [
+    '.eslintrc.js',
+    'dist',
+    'node_modules',
+    '**/migrations/*.ts'
+  ],
   rules: {
     // TypeScript específico
     '@typescript-eslint/interface-name-prefix': 'off',

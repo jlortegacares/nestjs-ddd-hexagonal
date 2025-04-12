@@ -3,18 +3,13 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { v4 as uuid } from 'uuid';
 
 import { User } from '../../domain/models/user.entity';
-import { USER_REPOSITORY, IUserRepository } from '../../domain/repositories/user.repository.interface';
+import {
+  IUserRepository,
+  USER_REPOSITORY,
+} from '../../domain/repositories/user.repository.interface';
 import { Email } from '../../domain/value-objects/email.value-object';
 import { Password } from '../../domain/value-objects/password.value-object';
-
-export class CreateUserCommand {
-  constructor(
-    public readonly email: string,
-    public readonly password: string,
-    public readonly firstName: string,
-    public readonly lastName: string,
-  ) {}
-}
+import { CreateUserCommand } from '../commands/create-user.command';
 
 @Injectable()
 @CommandHandler(CreateUserCommand)
@@ -35,13 +30,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
 
     const password = await Password.createFromPlainPassword(command.password);
 
-    const user = User.create(
-      uuid(),
-      email,
-      password,
-      command.firstName,
-      command.lastName,
-    );
+    const user = User.create(uuid(), email, password, command.firstName, command.lastName);
 
     await this.userRepository.save(user);
   }
