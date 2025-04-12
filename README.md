@@ -42,28 +42,39 @@ src/
 - **Validación:** class-validator
 - **Linting:** ESLint + Prettier
 - **Package Manager:** pnpm
+- **Node.js:** v23.0.0 o superior
 
 ## Requisitos
 
-- Node.js (v18 o superior)
+- Node.js v23.0.0 o superior
 - PostgreSQL
 - Redis
-- pnpm (recomendado) o npm
+- pnpm 8.0.0 o superior
 
 ## Configuración
 
-1. Clonar el repositorio:
+1. Asegúrate de tener la versión correcta de Node.js:
+```bash
+# Usando nvm (recomendado)
+nvm install 23
+nvm use 23
+
+# O verifica tu versión actual
+node --version # Debe mostrar v23.x.x
+```
+
+2. Clonar el repositorio:
 ```bash
 git clone https://github.com/jlortegacares/nestjs-ddd-hexagonal.git
 cd nestjs-ddd-hexagonal
 ```
 
-2. Instalar pnpm (si no está instalado):
+3. Instalar pnpm (si no está instalado):
 ```bash
-npm install -g pnpm
+npm install -g pnpm@latest
 ```
 
-3. Instalar dependencias:
+4. Instalar dependencias:
 ```bash
 pnpm install
 ```

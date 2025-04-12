@@ -2,6 +2,10 @@
   "name": "cursor_ddd",
   "version": "1.0.0",
   "description": "DDD example with NestJS",
+  "engines": {
+    "node": ">=23.0.0",
+    "pnpm": ">=8.0.0"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
