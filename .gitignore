@@ -77,3 +77,4 @@ docker-compose.override.yml
 
 # Project specific
 /src/**/persistence/orm/migrations/*.js
+dist/
