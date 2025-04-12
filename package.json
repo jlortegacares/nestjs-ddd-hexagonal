@@ -20,7 +20,12 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:generate": "pnpm typeorm migration:generate -d src/config/typeorm.config.ts",
+    "migration:create": "pnpm typeorm migration:create",
+    "migration:run": "pnpm typeorm migration:run -d src/config/typeorm.config.ts",
+    "migration:revert": "pnpm typeorm migration:revert -d src/config/typeorm.config.ts"
   },
   "keywords": [],
   "author": "",
@@ -85,5 +90,6 @@
   "bugs": {
     "url": "https://github.com/jlortegacares/nestjs-ddd-hexagonal/issues"
   },
-  "homepage": "https://github.com/jlortegacares/nestjs-ddd-hexagonal#readme"
+  "homepage": "https://github.com/jlortegacares/nestjs-ddd-hexagonal#readme",
+  "packageManager": "pnpm@10.8.0+sha512.0e82714d1b5b43c74610193cb20734897c1d00de89d0e18420aebc5977fa13d780a9cb05734624e81ebd81cc876cd464794850641c48b9544326b5622ca29971"
 }

@@ -90,10 +90,25 @@ cp .env.example .env
 createdb nestjs_ddd
 ```
 
-6. Ejecutar migraciones:
+## Gestión de Migraciones
+
+El proyecto utiliza TypeORM para gestionar las migraciones de la base de datos. Los siguientes comandos están disponibles:
+
 ```bash
-pnpm typeorm:run-migrations
+# Generar una nueva migración basada en los cambios de las entidades
+pnpm migration:generate src/migrations/nombre-migracion
+
+# Crear una migración vacía para personalización manual
+pnpm migration:create src/migrations/nombre-migracion
+
+# Ejecutar todas las migraciones pendientes
+pnpm migration:run
+
+# Revertir la última migración aplicada
+pnpm migration:revert
 ```
+
+La configuración de las migraciones se encuentra en `src/config/typeorm.config.ts`. Las migraciones se almacenan en el directorio `src/migrations/`.
 
 ## Desarrollo
 
