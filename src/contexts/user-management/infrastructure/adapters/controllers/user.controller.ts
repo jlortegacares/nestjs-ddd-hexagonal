@@ -1,28 +1,33 @@
-import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+import { Body, Controller, Get, HttpStatus, NotFoundException, Post, Query } from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { CreateUserCommand } from '../../../application/use-cases/create-user.use-case';
+import { CreateUserCommand } from '../../../application/commands/create-user.command';
+import { FindUserByEmailQuery } from '../../../application/queries/find-user-by-email.query';
 import { CreateUserDto } from './dtos/create-user.dto';
+import { UserResponse } from '../../../application/dtos/user.response';
 
 @ApiTags('users')
 @Controller('users')
 export class UserController {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Post()
-  @ApiOperation({ summary: 'Crear un nuevo usuario' })
+  @ApiOperation({ summary: 'Create a new user' })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Usuario creado exitosamente',
+    description: 'User created successfully',
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Datos de entrada inválidos',
+    description: 'Invalid input data',
   })
   @ApiResponse({
     status: HttpStatus.CONFLICT,
-    description: 'El email ya está registrado',
+    description: 'Email already registered',
   })
   async createUser(@Body() request: CreateUserDto): Promise<void> {
     const command = new CreateUserCommand(
@@ -33,5 +38,31 @@ export class UserController {
     );
 
     await this.commandBus.execute(command);
+  }
+
+  @Get('by-email')
+  @ApiOperation({ summary: 'Find user by email' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'User found',
+    type: UserResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'User not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid email format',
+  })
+  async findByEmail(@Query('email') email: string): Promise<UserResponse> {
+    const query = new FindUserByEmailQuery(email);
+    const user = await this.queryBus.execute(query);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 }
