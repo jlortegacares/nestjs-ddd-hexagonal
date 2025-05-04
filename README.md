@@ -12,6 +12,7 @@ Este proyecto es una implementación de ejemplo de Domain-Driven Design (DDD) ut
 - 📝 Redis para caché y proyecciones
 - 🔍 TypeORM para el manejo de la base de datos
 - 🚀 NestJS como framework base
+- - otras modificaciones
 
 ## Requisitos
 
